@@ -1323,10 +1323,14 @@ export interface SystemStatus {
     heapUsed: number;
     external: number;
     arrayBuffers: number;
+    total: number;
+    free: number;
+    percent: number;
   };
   cpu: {
-    user: number;
-    system: number;
+    percent: number;
+    cores: number;
+    model: string;
   };
   nodeVersion: string;
   platform: string;
@@ -1344,6 +1348,8 @@ export interface DeviceSummary {
 
 export interface DatabaseStatus {
   status: string;
+  type: string;
+  name?: string;
   error?: string;
   timestamp: string;
 }

@@ -164,18 +164,30 @@ export function DeviceControlPanel({ onViewHistory, onQuickAction }: DeviceContr
   async function handleBatchPower(power: boolean) {
     setBatchLoading(true);
     const targets = batchMode ? selectedDevices : (currentGroup?.devices || []);
-    for (const device of targets) {
-      const deviceId = 'id' in device ? device.id : (device as SelectedDevice).id;
-      try {
-        await setDeviceState(deviceId, { power });
-        setDeviceStates(prev => ({
-          ...prev,
-          [deviceId]: { ...prev[deviceId], power }
-        }));
-      } catch (error) {
-        console.error(`Failed to update device ${deviceId}:`, error);
+    const deviceIds = targets.map(d => 'id' in d ? d.id : (d as SelectedDevice).id);
+
+    try {
+      const response = await fetch('/api/batch/power', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ deviceIds, power })
+      });
+      const data = await response.json();
+      if (data.success) {
+        deviceIds.forEach(deviceId => {
+          setDeviceStates(prev => ({
+            ...prev,
+            [deviceId]: { ...prev[deviceId], power }
+          }));
+        });
       }
+    } catch (error) {
+      console.error('Failed to batch update devices:', error);
     }
+
     setBatchLoading(false);
     setShowBatchActions(false);
   }

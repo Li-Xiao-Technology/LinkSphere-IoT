@@ -36,6 +36,7 @@ model Device {
   tags             DeviceTagRelation[]
   thresholds       AlertThreshold[]
   firmwareVersions FirmwareVersion[]
+  groups           DeviceGroupRelation[]
 }
 
 model Scene {
@@ -109,20 +110,25 @@ model ScheduleAction {
 }
 
 model User {
-  id               String                  @id
-  username         String                  @unique
-  password         String
-  email            String?                 @unique
-  role             String                  @default("member")
-  householdId      String?
-  avatarUrl        String?
-  createdAt        DateTime                @default(now())
-  sharedWithMe     DeviceShare[]           @relation("DeviceShareRecipient")
-  ownedShares      DeviceShare[]           @relation("DeviceShareOwner")
-  ownedHouseholds  Household[]             @relation("OwnedHouseholds")
-  notificationPref NotificationPreference?
-  household        Household?              @relation("UserHouseholdRef", fields: [householdId], references: [id])
-  userHouseholds   UserHousehold[]
+  id                  String                  @id
+  username            String                  @unique
+  password            String
+  email               String?                 @unique
+  role                String                  @default("member")
+  householdId         String?
+  avatarUrl           String?
+  createdAt           DateTime                @default(now())
+  sharedWithMe        DeviceShare[]           @relation("DeviceShareRecipient")
+  ownedShares         DeviceShare[]           @relation("DeviceShareOwner")
+  ownedHouseholds     Household[]             @relation("OwnedHouseholds")
+  notificationPref    NotificationPreference?
+  household           Household?              @relation("UserHouseholdRef", fields: [householdId], references: [id])
+  userHouseholds      UserHousehold[]
+  dashboards          Dashboard[]
+  notificationChannels NotificationChannel[]
+  sceneRecommendations SceneRecommendation[]
+  ownedOrganizations  Organization[]         @relation("OrgOwner")
+  orgMemberships      OrgMember[]
 }
 
 model Room {
@@ -434,4 +440,145 @@ model UserActivity {
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+}
+
+// ===================== 功能1：设备分组管理 =====================
+model DeviceGroup {
+  id        String             @id @default(cuid())
+  name      String
+  icon      String             @default("folder")
+  color     String             @default("#6366F1")
+  sortIndex Int                @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now())
+  devices   DeviceGroupRelation[]
+
+  @@index([sortIndex])
+}
+
+model DeviceGroupRelation {
+  deviceId String
+  groupId  String
+  device   Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  group    DeviceGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([deviceId, groupId])
+  @@index([groupId])
+}
+
+// ===================== 功能2：自定义仪表盘 =====================
+model Dashboard {
+  id          String            @id @default(cuid())
+  name        String            @default("默认仪表盘")
+  userId      String
+  isDefault   Boolean           @default(false)
+  widgets     DashboardWidget[]
+  layout      String            // JSON serialized layout
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @default(now())
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DashboardWidget {
+  id        String     @id @default(cuid())
+  dashboardId String
+  type      String     // device-status, energy-summary, notification-list, quick-actions, weather, custom-chart
+  config    String     // JSON config
+  positionX Int        @default(0)
+  positionY Int        @default(0)
+  width     Int        @default(1)
+  height    Int        @default(1)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  dashboard Dashboard  @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  @@index([dashboardId])
+}
+
+// ===================== 功能3：外部通知渠道 =====================
+model NotificationChannel {
+  id        String             @id @default(cuid())
+  name      String
+  type      String             // email, sms, dingtalk, wework, telegram
+  config    String             // JSON config (api keys, webhook urls, etc.)
+  enabled   Boolean            @default(true)
+  events    String             // JSON array of event types to subscribe
+  userId    String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now())
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+}
+
+// ===================== 功能6：固件管理中心 =====================
+model Firmware {
+  id          String        @id @default(cuid())
+  brand       String
+  model       String
+  version     String
+  changelog   String?
+  downloadUrl String
+  fileSize    Int?
+  releasedAt  DateTime      @default(now())
+  isStable    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+
+  @@unique([brand, model, version])
+  @@index([brand])
+  @@index([model])
+}
+
+// ===================== 功能7：智能场景推荐 =====================
+model SceneRecommendation {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  icon        String?
+  devices     String   // JSON array of {deviceId, action, params}
+  confidence  Float    @default(0)
+  applied     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ===================== 功能8：多租户管理 =====================
+model Organization {
+  id          String             @id @default(cuid())
+  name        String
+  description String?
+  type        String             @default("company") // company, department, project
+  parentId    String?
+  ownerId     String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @default(now())
+  owner       User               @relation("OrgOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  parent      Organization?      @relation("OrgHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Organization[]     @relation("OrgHierarchy")
+  members     OrgMember[]
+
+  @@index([ownerId])
+  @@index([parentId])
+}
+
+model OrgMember {
+  id            String     @id @default(cuid())
+  orgId         String
+  userId        String
+  role          String     @default("member") // admin, member, viewer
+  joinedAt      DateTime   @default(now())
+  organization  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([orgId])
+  @@index([userId])
 }

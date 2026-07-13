@@ -33,12 +33,15 @@
 
 ### 设备管理
 - **多协议接入**：米家（OAuth）、海尔 U+、美的美居、Yeelight BLE、Modbus TCP、西门子 S7、MQTT
+- **设备分组管理**：自定义分组、图标、颜色，批量分配设备到分组，分组批量控制
+- **批量设备操作**：批量开关、批量分配房间/分组/标签、批量删除、批量固件升级
 - **PLC 支持**：S7-200 SMART 等兼容 Modbus TCP / S7 协议的 PLC 设备
 - **蓝牙设备**：支持 Yeelight 蓝牙设备（如 XMCTD01YL 床头灯）的自动发现、配对与控制
 - **寄存器映射**：可配置的寄存器地址映射，支持 bool / uint16 / int16 / float32 等数据类型
 - **PLC 趋势图**：SVG 实时趋势图表，支持寄存器历史数据可视化
 - **调试终端**：在线读写寄存器，Float32 实时解析
 - **设备状态实时同步**（WebSocket 推送 + 轮询双机制）
+- **设备状态历史**：可视化展示设备状态变化历史（在线率、开关状态等趋势图）
 - **固定尺寸设备卡片**：一致的 300x360px 卡片布局，支持开关、滑块、传感器数据显示
 - **设备重命名**：支持通过设备卡片菜单快速重命名
 
@@ -51,6 +54,7 @@
 ### 场景与定时
 - **场景管理**：一键执行多设备动作
 - **场景模板**：回家、离家、睡眠、观影等预设
+- **智能场景推荐**：基于设备使用模式自动生成场景建议，一键应用
 - **定时任务**（Cron 表达式）
 - **周期性任务调度**
 
@@ -59,6 +63,23 @@
 - **家庭管理**：多家庭切换
 - **多成员协作**：邀请家庭成员、分配角色
 - **设备分享**：临时分享设备给他人
+
+### 自定义仪表盘
+- **拖拽式布局**：自由添加、排列、调整大小
+- **多种组件类型**：设备状态概览、快捷开关、数据统计、实时图表
+- **多仪表盘支持**：创建多个仪表盘，满足不同场景需求
+
+### 固件管理中心
+- **固件版本管理**：上传、发布、归档固件版本
+- **设备兼容性**：管理固件支持的设备品牌和型号
+- **批量升级任务**：创建升级计划，批量推送固件
+- **升级状态追踪**：实时监控升级进度和结果
+
+### 多租户管理
+- **组织管理**：创建和管理多个组织（租户）
+- **成员邀请**：通过邮箱或链接邀请成员加入组织
+- **角色分配**：组织内成员角色管理
+- **数据隔离**：租户间数据完全隔离
 
 ### 权限系统
 - **RBAC 角色权限**：管理员 / 成员 / 访客 / 自定义角色
@@ -79,6 +100,7 @@
 
 ### 通知系统
 - **实时消息推送**（Socket.io）
+- **外部通知渠道**：Webhook、邮件、钉钉、企业微信、飞书、Slack、Telegram 等
 - **通知中心管理**
 - **通知偏好设置**：自定义接收哪些通知
 
@@ -155,6 +177,13 @@ IOT/
 │   │   │   ├── HaierAdapter.ts        # 海尔
 │   │   │   └── MideaAdapter.ts        # 美的
 │   │   ├── routes/             # API 路由
+│   │   │   ├── deviceGroup.ts         # 设备分组管理
+│   │   │   ├── dashboard.ts           # 自定义仪表盘
+│   │   │   ├── notificationChannel.ts # 外部通知渠道
+│   │   │   ├── batch.ts               # 批量设备操作
+│   │   │   ├── firmwareCenter.ts      # 固件管理中心
+│   │   │   ├── sceneRecommendation.ts # 智能场景推荐
+│   │   │   └── organization.ts        # 多租户组织管理
 │   │   ├── types/              # 类型定义
 │   │   ├── utils/              # 工具函数
 │   │   │   ├── logger.ts       # 分级日志（debug/info/warn/error）
@@ -200,20 +229,30 @@ npm install
 
 ### 配置环境变量
 
-编辑 `backend/.env` 文件：
+复制环境变量模板并按需修改：
 
-```env
-PORT=3001
-JWT_SECRET=your_jwt_secret_key_here
-ENCRYPTION_KEY=iot-encryption-key-32-bytes
-DB_PATH=./data/iot_platform.db
-DATABASE_URL="file:./data/iot_platform.db"
-DB_PROVIDER=sqlite
-FRONTEND_URL=http://localhost:3000
-NODE_ENV=development
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX=1000
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
+
+**`backend/.env` 关键变量说明：**
+
+| 变量 | 必填 | 说明 |
+| --- | --- | --- |
+| `JWT_SECRET` | 是 | JWT 签名密钥，至少 32 位。生产环境用 `openssl rand -hex 32` 生成 |
+| `ENCRYPTION_KEY` | 是 | 设备凭据加密密钥，生产环境必须独立设置 |
+| `DATABASE_URL` | 是 | `file:./data/iot_platform.db`（SQLite）或 PostgreSQL 连接串 |
+| `DB_PROVIDER` | 否 | `sqlite` 或 `postgresql` |
+| `FRONTEND_URL` | 否 | 允许的前端来源，多个用逗号分隔 |
+| `API_BASE_URL` | 否 | Swagger UI 显示的服务地址 |
+| `INITIAL_ADMIN_PASSWORD` | 首次 seed 时 | 至少 8 位字符，仅用于创建初始管理员 |
+
+**`frontend/.env` 关键变量说明：**
+
+| 变量 | 必填 | 说明 |
+| --- | --- | --- |
+| `REACT_APP_SOCKET_URL` | 否 | WebSocket 后端地址。空值时使用当前 origin（同源部署） |
 
 ### 初始化数据库
 
@@ -282,6 +321,28 @@ docker-compose up -d
 | DELETE | /api/devices/:id | 删除设备 |
 | POST | /api/devices/discover | 设备发现 |
 
+### 设备分组接口
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/device-groups | 获取分组列表 |
+| POST | /api/device-groups | 创建分组 |
+| PUT | /api/device-groups/:id | 更新分组 |
+| DELETE | /api/device-groups/:id | 删除分组 |
+| POST | /api/device-groups/:id/devices | 批量添加设备到分组 |
+| DELETE | /api/device-groups/:id/devices/:deviceId | 从分组移除设备 |
+| POST | /api/device-groups/:id/action | 分组批量控制 |
+
+### 批量操作接口
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| POST | /api/batch/power | 批量开关设备 |
+| POST | /api/batch/action | 批量执行动作 |
+| POST | /api/batch/assign-room | 批量分配房间 |
+| POST | /api/batch/assign-group | 批量分配分组 |
+| POST | /api/batch/assign-tags | 批量分配标签 |
+| POST | /api/batch/delete | 批量删除设备 |
+| POST | /api/batch/update-firmware | 批量更新固件 |
+
 ### Modbus / PLC 接口
 | 方法 | 路径 | 描述 |
 |------|------|------|
@@ -308,6 +369,56 @@ docker-compose up -d
 | POST | /api/mqtt/devices | 添加 MQTT 设备 |
 | GET | /api/mqtt/devices/:deviceId/state | 获取设备状态 |
 | POST | /api/mqtt/devices/:deviceId/state | 控制设备 |
+
+### 仪表盘接口
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/dashboards | 获取仪表盘列表 |
+| POST | /api/dashboards | 创建仪表盘 |
+| PUT | /api/dashboards/:id | 更新仪表盘 |
+| DELETE | /api/dashboards/:id | 删除仪表盘 |
+| POST | /api/dashboards/:id/widgets | 添加组件 |
+| PUT | /api/dashboards/:id/widgets/:widgetId | 更新组件 |
+| DELETE | /api/dashboards/:id/widgets/:widgetId | 删除组件 |
+
+### 通知渠道接口
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/notification-channels | 获取渠道列表 |
+| POST | /api/notification-channels | 创建渠道 |
+| PUT | /api/notification-channels/:id | 更新渠道 |
+| DELETE | /api/notification-channels/:id | 删除渠道 |
+| POST | /api/notification-channels/:id/test | 测试渠道 |
+
+### 固件管理接口
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/firmware | 获取固件列表 |
+| POST | /api/firmware | 上传固件 |
+| PUT | /api/firmware/:id | 更新固件信息 |
+| DELETE | /api/firmware/:id | 删除固件 |
+| POST | /api/firmware/:id/upgrade | 创建升级任务 |
+| GET | /api/firmware/upgrades | 获取升级任务列表 |
+
+### 场景推荐接口
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/scene-recommendations | 获取推荐列表 |
+| POST | /api/scene-recommendations | 生成新推荐 |
+| POST | /api/scene-recommendations/:id/apply | 应用推荐为场景 |
+| DELETE | /api/scene-recommendations/:id | 忽略推荐 |
+
+### 多租户（组织）接口
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/organizations | 获取组织列表 |
+| POST | /api/organizations | 创建组织 |
+| PUT | /api/organizations/:id | 更新组织 |
+| DELETE | /api/organizations/:id | 删除组织 |
+| POST | /api/organizations/:id/members | 邀请成员 |
+| PUT | /api/organizations/:id/members/:userId | 更新成员角色 |
+| DELETE | /api/organizations/:id/members/:userId | 移除成员 |
+| POST | /api/organizations/:id/switch | 切换当前组织 |
 
 完整 API 文档可在启动后端后访问：`http://localhost:3001/api-docs`
 
@@ -378,23 +489,27 @@ interface ProtocolAdapter {
 
 ## 数据库模型
 
-共 18+ 个数据模型，涵盖：
-- **用户与组织**：User、Household、UserHousehold
-- **设备**：Device、DeviceStateHistory、DeviceShare、PlcRegisterHistory
-- **自动化**：Rule、RuleExecutionHistory、Scene、SceneTemplate、Schedule
+共 27+ 个数据模型，涵盖：
+- **用户与组织**：User、Household、UserHousehold、Organization、OrganizationMember
+- **设备**：Device、DeviceStateHistory、DeviceShare、PlcRegisterHistory、DeviceGroup、DeviceGroupRelation
+- **自动化**：Rule、RuleExecutionHistory、Scene、SceneTemplate、Schedule、SceneRecommendation
+- **仪表盘**：Dashboard、DashboardWidget
 - **能耗**：EnergyLog
-- **通知**：Notification、NotificationPreference
+- **通知**：Notification、NotificationPreference、NotificationChannel、NotificationLog
 - **权限**：Permission、RolePermission、UserPermission
 - **空间**：Room
+- **固件**：Firmware、FirmwareUpgrade
 
 ---
 
 ## PWA 支持
 
-- 离线访问（Service Worker）
-- 桌面图标安装
-- 推送通知
-- 响应式设计（手机 / 平板 / 桌面）
+- **离线访问**：Service Worker 缓存静态资源和 API 数据
+- **桌面图标安装**：支持安装为桌面应用
+- **推送通知**：支持浏览器推送通知（需用户授权）
+- **后台同步**：设备状态后台同步，网络恢复后自动更新
+- **版本更新提示**：检测到新版本时自动提示用户更新
+- **响应式设计**：适配手机、平板、桌面多种屏幕尺寸
 
 ---
 

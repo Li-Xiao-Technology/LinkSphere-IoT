@@ -19,6 +19,12 @@ interface TabConfig {
 
 const tabs: TabConfig[] = [
   {
+    key: 'system',
+    label: '系统',
+    icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    showInMobile: true,
+  },
+  {
     key: 'devices',
     label: '设备',
     icon: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
@@ -35,11 +41,6 @@ const tabs: TabConfig[] = [
     label: '场景',
     icon: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>',
     showInMobile: true,
-  },
-  {
-    key: 'rules',
-    label: '自动化',
-    icon: '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>',
   },
   {
     key: 'energy',
@@ -66,8 +67,28 @@ const tabs: TabConfig[] = [
 
 const desktopMoreTabs: TabConfig[] = [
   {
+    key: 'dashboard',
+    label: '仪表盘',
+    icon: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+  },
+  {
+    key: 'rules',
+    label: '自动化',
+    icon: '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>',
+  },
+  {
+    key: 'groups',
+    label: '设备分组',
+    icon: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  },
+  {
     key: 'household',
     label: '家庭管理',
+    icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  },
+  {
+    key: 'organizations',
+    label: '组织管理',
     icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   },
   {
@@ -76,9 +97,9 @@ const desktopMoreTabs: TabConfig[] = [
     icon: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
   },
   {
-    key: 'system',
-    label: '系统状态',
-    icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    key: 'scene-recommendations',
+    label: '场景推荐',
+    icon: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
   },
   {
     key: 'analytics',
@@ -101,9 +122,19 @@ const desktopMoreTabs: TabConfig[] = [
     icon: '<path d="M18 16.08h-.76a2.91 2.91 0 0 1-2.06-.8l-1.71-1.71a2 2 0 0 0-2.83 0l-1.71 1.71a2.91 2.91 0 0 1-2.06.8H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2z"/><path d="M9 13l3-3 3 3"/>',
   },
   {
+    key: 'firmware-center',
+    label: '固件中心',
+    icon: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>',
+  },
+  {
     key: 'firmware',
     label: '固件管理',
     icon: '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3"/>',
+  },
+  {
+    key: 'notification-channels',
+    label: '通知渠道',
+    icon: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
   },
   {
     key: 'audit-logs',
@@ -124,6 +155,11 @@ const desktopMoreTabs: TabConfig[] = [
 
 const mobileBottomTabs: TabConfig[] = [
   {
+    key: 'system',
+    label: '系统',
+    icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  },
+  {
     key: 'devices',
     label: '设备',
     icon: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
@@ -143,18 +179,13 @@ const mobileBottomTabs: TabConfig[] = [
     label: '房间',
     icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
   },
-  {
-    key: 'household',
-    label: '我的',
-    icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-  },
 ];
 
 const mobileMoreTabs: TabConfig[] = [
   {
     key: 'rules',
-    label: '规则',
-    icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    label: '自动化',
+    icon: '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>',
   },
   {
     key: 'predictions',
@@ -177,9 +208,9 @@ const mobileMoreTabs: TabConfig[] = [
     icon: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
   },
   {
-    key: 'system',
-    label: '系统状态',
-    icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    key: 'household',
+    label: '家庭管理',
+    icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
   },
   {
     key: 'audit-logs',

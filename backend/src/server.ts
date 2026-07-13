@@ -42,6 +42,13 @@ import analyticsRoutes from './routes/analytics';
 import firmwareRoutes from './routes/firmware';
 import pluginRoutes from './routes/plugins';
 import avatarRoutes from './routes/avatar';
+import deviceGroupRoutes from './routes/deviceGroup';
+import dashboardRoutes from './routes/dashboard';
+import notificationChannelRoutes from './routes/notificationChannel';
+import batchRoutes from './routes/batch';
+import firmwareCenterRoutes from './routes/firmwareCenter';
+import sceneRecommendationRoutes from './routes/sceneRecommendation';
+import organizationRoutes from './routes/organization';
 import { authMiddleware } from './middleware/auth';
 import { rateLimitMiddleware } from './middleware/rateLimit';
 import { requestLoggerMiddleware } from './middleware/requestLogger';
@@ -65,16 +72,23 @@ if (process.env.JWT_SECRET.length < 32) {
   logger.warn('JWT_SECRET is too short (recommended: 32+ characters). Consider using a longer secret.');
 }
 
+// 支持通过 FRONTEND_URL 配置多个前端来源（逗号分隔），便于多环境部署
+const rawFrontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+const allowedOrigins = rawFrontendUrl
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const corsOrigin: string | string[] = allowedOrigins.length > 1 ? allowedOrigins : allowedOrigins[0];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE']
   }
 });
-
-const corsOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -83,7 +97,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", corsOrigin],
+      connectSrc: ["'self'", ...(Array.isArray(corsOrigin) ? corsOrigin : [corsOrigin])],
     },
   },
 }));
@@ -130,6 +144,13 @@ app.use('/api/analytics', rateLimitMiddleware, authMiddleware, analyticsRoutes);
 app.use('/api/firmware', rateLimitMiddleware, authMiddleware, firmwareRoutes);
 app.use('/api/plugins', rateLimitMiddleware, authMiddleware, pluginRoutes);
 app.use('/api/avatar', rateLimitMiddleware, authMiddleware, avatarRoutes);
+app.use('/api/device-groups', rateLimitMiddleware, authMiddleware, deviceGroupRoutes);
+app.use('/api/dashboards', rateLimitMiddleware, authMiddleware, dashboardRoutes);
+app.use('/api/notification-channels', rateLimitMiddleware, authMiddleware, notificationChannelRoutes);
+app.use('/api/batch', rateLimitMiddleware, authMiddleware, batchRoutes);
+app.use('/api/firmware-center', rateLimitMiddleware, authMiddleware, firmwareCenterRoutes);
+app.use('/api/scene-recommendations', rateLimitMiddleware, authMiddleware, sceneRecommendationRoutes);
+app.use('/api/organizations', rateLimitMiddleware, authMiddleware, organizationRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

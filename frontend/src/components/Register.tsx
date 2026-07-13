@@ -78,7 +78,7 @@ export function Register() {
 
       const loginSuccess = await login(username, password);
       if (loginSuccess) {
-        navigate('/devices');
+        navigate('/system');
       }
       setIsLoading(false);
     } catch {

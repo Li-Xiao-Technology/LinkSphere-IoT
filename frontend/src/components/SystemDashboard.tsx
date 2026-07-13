@@ -87,20 +87,24 @@ export function SystemDashboard() {
   const onlinePercent = totalDevices > 0 ? Math.round((onlineCount / totalDevices) * 100) : 0;
 
   const rssMb = status ? formatBytes(status.memory.rss) : 0;
-  const heapUsedMb = status ? formatBytes(status.memory.heapUsed) : 0;
-  const heapTotalMb = status ? formatBytes(status.memory.heapTotal) : 0;
-  const heapPercent = heapTotalMb > 0 ? Math.round((heapUsedMb / heapTotalMb) * 100) : 0;
+
+  const cpuPercent = status ? Math.round(status.cpu.percent) : 0;
+  const totalMemoryGb = status ? (status.memory.total / (1024 * 1024 * 1024)).toFixed(1) : 0;
+  const freeMemoryGb = status ? (status.memory.free / (1024 * 1024 * 1024)).toFixed(1) : 0;
 
   const dbOk = dbStatus?.status === 'ok';
   const recentNotifications = notifications.slice(0, 5);
+
+  const deviceTypes = deviceSummary?.byType ?? [];
+  const deviceBrands = deviceSummary?.byBrand ?? [];
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
-          <h2 style={styles.title}>系统状态</h2>
+          <h2 style={styles.title}>系统</h2>
           <p style={styles.subtitle}>
-            实时监控系统运行状态
+            实时监控系统运行状态与核心数据
             {lastRefresh && <span style={styles.refreshTime}> · 上次刷新 {formatTime(lastRefresh.toISOString())}</span>}
           </p>
         </div>
@@ -154,16 +158,19 @@ export function SystemDashboard() {
                     <line x1="6" y1="18" x2="6.01" y2="18" />
                   </svg>
                 </div>
-                <span style={styles.cardLabel}>内存使用 (RSS)</span>
+                <span style={styles.cardLabel}>内存使用</span>
               </div>
-              <div style={styles.cardValue}>{rssMb} MB</div>
+              <div style={styles.cardValue}>{status?.memory.percent ?? 0}%</div>
               <div style={styles.progressWrap}>
                 <div style={styles.progressTrack}>
-                  <div style={{ ...styles.progressFill, width: `${Math.min(heapPercent, 100)}%`, background: '#8B5CF6' }} />
+                  <div style={{ ...styles.progressFill, width: `${Math.min(status?.memory.percent ?? 0, 100)}%`, background: '#8B5CF6' }} />
                 </div>
                 <span style={styles.progressLabel}>
-                  堆 {heapUsedMb} / {heapTotalMb} MB ({heapPercent}%)
+                  {totalMemoryGb} GB 总 · {freeMemoryGb} GB 可用
                 </span>
+              </div>
+              <div style={styles.cardMeta}>
+                进程占用 {rssMb} MB
               </div>
             </div>
 
@@ -190,6 +197,36 @@ export function SystemDashboard() {
               </div>
             </div>
 
+            {/* CPU 使用率 */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <div style={{ ...styles.cardIcon, background: 'rgba(245, 158, 11, 0.08)' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                    <rect x="9" y="9" width="6" height="6" />
+                    <line x1="9" y1="1" x2="9" y2="4" />
+                    <line x1="15" y1="1" x2="15" y2="4" />
+                    <line x1="9" y1="20" x2="9" y2="23" />
+                    <line x1="15" y1="20" x2="15" y2="23" />
+                    <line x1="20" y1="9" x2="23" y2="9" />
+                    <line x1="20" y1="14" x2="23" y2="14" />
+                    <line x1="1" y1="9" x2="4" y2="9" />
+                    <line x1="1" y1="14" x2="4" y2="14" />
+                  </svg>
+                </div>
+                <span style={styles.cardLabel}>CPU 使用率</span>
+              </div>
+              <div style={styles.cardValue}>{cpuPercent}%</div>
+              <div style={styles.progressWrap}>
+                <div style={styles.progressTrack}>
+                  <div style={{ ...styles.progressFill, width: `${Math.min(cpuPercent, 100)}%`, background: cpuPercent > 80 ? '#C42B1C' : cpuPercent > 50 ? '#F59E0B' : '#107C10' }} />
+                </div>
+                <span style={styles.progressLabel}>
+                  {status?.cpu.cores} 核 · {status?.cpu.model?.substring(0, 30)}...
+                </span>
+              </div>
+            </div>
+
             {/* 数据库状态 */}
             <div style={styles.card}>
               <div style={styles.cardHeader}>
@@ -202,6 +239,11 @@ export function SystemDashboard() {
                 </div>
                 <span style={styles.cardLabel}>数据库连接</span>
               </div>
+              {dbStatus?.type && (
+                <div style={styles.dbTypeRow}>
+                  <span style={styles.dbTypeValue}>{dbStatus.type}</span>
+                </div>
+              )}
               <div style={styles.dbStatusRow}>
                 <span style={{ ...styles.dbBadge, ...(dbOk ? styles.dbBadgeOk : styles.dbBadgeError) }}>
                   {dbOk ? '已连接' : '异常'}
@@ -210,6 +252,39 @@ export function SystemDashboard() {
               {dbStatus?.error && (
                 <div style={styles.dbErrorText}>{dbStatus.error}</div>
               )}
+            </div>
+          </div>
+
+          {/* 核心数据统计 */}
+          <div style={styles.statsBar}>
+            <div style={styles.statItem}>
+              <div style={styles.statValue}>{totalDevices}</div>
+              <div style={styles.statLabel}>设备总数</div>
+            </div>
+            <div style={styles.statDivider} />
+            <div style={styles.statItem}>
+              <div style={{ ...styles.statValue, color: '#107C10' }}>{onlineCount}</div>
+              <div style={styles.statLabel}>在线设备</div>
+            </div>
+            <div style={styles.statDivider} />
+            <div style={styles.statItem}>
+              <div style={{ ...styles.statValue, color: '#C42B1C' }}>{totalDevices - onlineCount}</div>
+              <div style={styles.statLabel}>离线设备</div>
+            </div>
+            <div style={styles.statDivider} />
+            <div style={styles.statItem}>
+              <div style={styles.statValue}>{deviceTypes.length}</div>
+              <div style={styles.statLabel}>设备类型</div>
+            </div>
+            <div style={styles.statDivider} />
+            <div style={styles.statItem}>
+              <div style={styles.statValue}>{deviceBrands.length}</div>
+              <div style={styles.statLabel}>品牌厂商</div>
+            </div>
+            <div style={styles.statDivider} />
+            <div style={styles.statItem}>
+              <div style={styles.statValue}>{status?.memory.percent ?? 0}%</div>
+              <div style={styles.statLabel}>内存占用</div>
             </div>
           </div>
 
@@ -411,6 +486,22 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontFamily: 'monospace',
     wordBreak: 'break-all',
   },
+  dbTypeRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    marginBottom: '8px',
+  },
+  dbTypeValue: {
+    fontSize: '20px',
+    fontWeight: 700,
+    color: '#1A1A1A',
+  },
+  dbTypeName: {
+    fontSize: '12px',
+    color: '#8A8A8A',
+    wordBreak: 'break-all',
+  },
   notifCard: {
     background: 'rgba(255, 255, 255, 0.72)',
     backdropFilter: 'blur(40px) saturate(125%)',
@@ -487,6 +578,43 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '11px',
     color: '#8A8A8A',
     whiteSpace: 'nowrap',
+    flexShrink: 0,
+  },
+  statsBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    background: 'rgba(255, 255, 255, 0.72)',
+    backdropFilter: 'blur(40px) saturate(125%)',
+    WebkitBackdropFilter: 'blur(40px) saturate(125%)',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '12px',
+    padding: '16px 20px',
+    marginBottom: '16px',
+    overflowX: 'auto',
+  },
+  statItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+    flex: '1',
+    minWidth: '80px',
+  },
+  statValue: {
+    fontSize: '24px',
+    fontWeight: 700,
+    color: '#005FB8',
+    lineHeight: 1,
+  },
+  statLabel: {
+    fontSize: '12px',
+    color: '#8A8A8A',
+  },
+  statDivider: {
+    width: '1px',
+    height: '32px',
+    background: 'rgba(0, 0, 0, 0.06)',
     flexShrink: 0,
   },
 };

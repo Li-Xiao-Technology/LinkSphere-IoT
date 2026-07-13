@@ -29,6 +29,13 @@ import { ConfigManager } from './components/ConfigManager';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { FirmwareManager } from './components/FirmwareManager';
 import { DataExport } from './components/DataExport';
+import { DeviceGroups } from './pages/DeviceGroups';
+import { DashboardPage } from './pages/DashboardPage';
+import { NotificationChannels } from './pages/NotificationChannels';
+import { DeviceStateHistory } from './pages/DeviceStateHistory';
+import { FirmwareCenter } from './pages/FirmwareCenter';
+import { SceneRecommendations } from './pages/SceneRecommendations';
+import { OrganizationManagement } from './pages/OrganizationManagement';
 import { SearchResult } from './api';
 import { useDeviceStore } from './store/deviceStore';
 import { useNotificationStore } from './store/notificationStore';
@@ -61,7 +68,7 @@ function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const activeTab = location.pathname.split('/')[1] || 'devices';
+  const activeTab = location.pathname.split('/')[1] || 'system';
 
   // Sync URL to store for backward compatibility
   useEffect(() => {
@@ -197,8 +204,15 @@ function App() {
             <Route path="/export" element={<DataExport />} />
             <Route path="/settings" element={<Settings onNavigate={(page) => navigate(`/${page}`)} />} />
             <Route path="/profile" element={<Profile onNavigate={(page) => navigate(`/${page}`)} />} />
-            <Route path="/" element={<Navigate to="/devices" replace />} />
-            <Route path="*" element={<Navigate to="/devices" replace />} />
+            <Route path="/groups" element={<DeviceGroups />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/notification-channels" element={<NotificationChannels />} />
+            <Route path="/device-history/:deviceId" element={<DeviceStateHistory />} />
+            <Route path="/firmware-center" element={<FirmwareCenter />} />
+            <Route path="/scene-recommendations" element={<SceneRecommendations />} />
+            <Route path="/organizations" element={<OrganizationManagement />} />
+            <Route path="/" element={<Navigate to="/system" replace />} />
+            <Route path="*" element={<Navigate to="/system" replace />} />
           </Routes>
           {historyDevice && (
             <div style={styles.historyContainer}>

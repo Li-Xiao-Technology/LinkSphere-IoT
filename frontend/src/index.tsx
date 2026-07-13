@@ -19,25 +19,57 @@ root.render(
   </BrowserRouter>
 );
 
-// 强制清除旧 Service Worker 和缓存，只执行一次
-const SW_CLEANED_KEY = '__sw_cleaned_20250706__';
-
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      const hasOldSW = registrations.length > 0;
-      if (hasOldSW && !localStorage.getItem(SW_CLEANED_KEY)) {
-        Promise.all([
-          ...registrations.map((r) => r.unregister()),
-          caches.keys().then((names) => Promise.all(names.map((n) => caches.delete(n)))),
-        ]).then(() => {
-          localStorage.setItem(SW_CLEANED_KEY, 'true');
-          window.location.reload();
-        }).catch(() => {
-          localStorage.setItem(SW_CLEANED_KEY, 'true');
-          window.location.reload();
-        });
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              if (window.confirm('发现新版本，是否立即更新？')) {
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+              }
+            }
+          });
+        }
+      });
+
+      if ('SyncManager' in window) {
+        await (registration as any).sync.register('sync-device-states');
       }
-    });
+
+      if ('PushManager' in window) {
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            const subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(
+                'BNdN6Qv5bW2Y8Q3z9P1u7X2t0S6w4R9m8K3e1C4v7B6n5M2x8L9o0K1j3H7g2F5d4A1s8D9f6G0h'
+              )
+            });
+            console.log('Push subscription:', subscription);
+          }
+        } catch (error) {
+          console.log('Push notification not available:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+    }
   });
+}
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }

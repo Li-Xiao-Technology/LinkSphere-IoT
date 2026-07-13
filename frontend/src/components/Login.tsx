@@ -34,7 +34,7 @@ export function Login() {
     const success = await login(username, password);
     
     if (success) {
-      navigate('/devices');
+      navigate('/system');
     } else {
       setError('用户名或密码错误');
     }

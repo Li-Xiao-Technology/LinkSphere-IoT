@@ -33,8 +33,14 @@ export const useSocketStore = create<SocketStore>((set, get) => ({
     }
 
     console.log('[Socket] Connecting to server...');
-    
-    const socket = io('http://localhost:3001', {
+
+    // 通过 REACT_APP_SOCKET_URL 注入，便于跨域/跨主机部署
+    // 未设置时使用当前 origin（同源部署最简）
+    const socketUrl =
+      (typeof process !== 'undefined' && process.env?.REACT_APP_SOCKET_URL) ||
+      (typeof window !== 'undefined' ? window.location.origin : '');
+
+    const socket = io(socketUrl, {
       auth: { token },
       transports: ['websocket', 'polling'],
     });
