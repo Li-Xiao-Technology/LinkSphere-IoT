@@ -1,0 +1,437 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Device {
+  id               String               @id
+  name             String
+  brand            String
+  type             String
+  model            String?
+  status           String               @default("offline")
+  connectionType   String
+  ipAddress        String?
+  macAddress       String?
+  lastSyncTime     DateTime?
+  firmwareVersion  String?
+  config           String?
+  roomId           String?
+  powerConsumption Float                @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @default(now())
+  networkName      String?
+  networkStrength  Int?
+  sn               String?
+  room             Room?                @relation(fields: [roomId], references: [id])
+  deviceShares     DeviceShare[]
+  stateHistory     DeviceStateHistory[]
+  energyLogs       EnergyLog[]
+  notifications    Notification[]
+  tags             DeviceTagRelation[]
+  thresholds       AlertThreshold[]
+  firmwareVersions FirmwareVersion[]
+}
+
+model Scene {
+  id           String        @id
+  name         String
+  description  String?
+  icon         String?
+  actions      String        // Deprecated: JSON blob, kept for migration fallback
+  sceneActions SceneAction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
+}
+
+model SceneAction {
+  id        String  @id @default(cuid())
+  sceneId   String
+  deviceId  String
+  action    String
+  params    String?
+  sortOrder Int     @default(0)
+  scene     Scene   @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@index([sceneId])
+}
+
+model SceneTemplate {
+  id              String                @id
+  name            String
+  description     String?
+  icon            String?
+  category        String
+  actions         String                // Deprecated: JSON blob
+  templateActions SceneTemplateAction[]
+  isPreset        Boolean               @default(true)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @default(now())
+}
+
+model SceneTemplateAction {
+  id         String        @id @default(cuid())
+  templateId String
+  deviceId   String
+  action     String
+  params     String?
+  sortOrder  Int           @default(0)
+  template   SceneTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+}
+
+model Schedule {
+  id              String           @id
+  name            String
+  cronExpression  String
+  action          String           // Deprecated: JSON blob
+  enabled         Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+  deviceId        String?          // Deprecated: duplicated in action JSON
+  scheduleActions ScheduleAction[]
+}
+
+model ScheduleAction {
+  id         String   @id @default(cuid())
+  scheduleId String
+  deviceId   String
+  params     String?
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
+}
+
+model User {
+  id               String                  @id
+  username         String                  @unique
+  password         String
+  email            String?                 @unique
+  role             String                  @default("member")
+  householdId      String?
+  avatarUrl        String?
+  createdAt        DateTime                @default(now())
+  sharedWithMe     DeviceShare[]           @relation("DeviceShareRecipient")
+  ownedShares      DeviceShare[]           @relation("DeviceShareOwner")
+  ownedHouseholds  Household[]             @relation("OwnedHouseholds")
+  notificationPref NotificationPreference?
+  household        Household?              @relation("UserHouseholdRef", fields: [householdId], references: [id])
+  userHouseholds   UserHousehold[]
+}
+
+model Room {
+  id        String   @id
+  name      String
+  icon      String   @default("home")
+  sortIndex Int      @default(0)
+  createdAt DateTime @default(now())
+  devices   Device[]
+}
+
+model Notification {
+  id        String   @id
+  type      String
+  title     String
+  body      String?
+  deviceId  String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  device    Device?  @relation(fields: [deviceId], references: [id])
+}
+
+model EnergyLog {
+  id         String   @id
+  deviceId   String
+  power      Float
+  recordedAt DateTime @default(now())
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+}
+
+model DeviceStateHistory {
+  id        String   @id
+  deviceId  String
+  status    String
+  state     String?
+  changedAt DateTime @default(now())
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@index([changedAt])
+}
+
+model Rule {
+  id               String                 @id
+  name             String
+  enabled          Boolean                @default(true)
+  triggerType      String
+  triggerCondition String                 // Deprecated: JSON blob
+  actions          String                 // Deprecated: JSON blob
+  cronExpression   String?                // For time triggers
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @default(now())
+  executionHistory RuleExecutionHistory[]
+  ruleConditions   RuleCondition[]
+  ruleActions      RuleAction[]
+}
+
+model RuleCondition {
+  id        String  @id @default(cuid())
+  ruleId    String
+  deviceId  String?
+  property  String?
+  operator  String?
+  value     String?
+  logic     String? // 'AND' | 'OR' for grouped conditions
+  sortOrder Int     @default(0)
+  rule      Rule    @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+}
+
+model RuleAction {
+  id        String  @id @default(cuid())
+  ruleId    String
+  deviceId  String
+  action    String
+  params    String?
+  delay     Int     @default(0)
+  sortOrder Int     @default(0)
+  rule      Rule    @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+}
+
+model RuleExecutionHistory {
+  id         String   @id
+  ruleId     String
+  status     String   @default("success")
+  message    String?
+  executedAt DateTime @default(now())
+  rule       Rule     @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@index([executedAt])
+}
+
+model Household {
+  id        String          @id
+  name      String
+  ownerId   String
+  createdAt DateTime        @default(now())
+  owner     User            @relation("OwnedHouseholds", fields: [ownerId], references: [id], onDelete: Cascade)
+  residents User[]          @relation("UserHouseholdRef")
+  members   UserHousehold[]
+
+  @@index([ownerId])
+}
+
+model UserHousehold {
+  userId      String
+  householdId String
+  role        String    @default("member")
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, householdId])
+}
+
+model NotificationPreference {
+  userId           String   @id
+  deviceOffline    Boolean  @default(true)
+  deviceOnline     Boolean  @default(false)
+  warning          Boolean  @default(true)
+  info             Boolean  @default(false)
+  ruleTriggered    Boolean  @default(true)
+  firmwareUpdate   Boolean  @default(true)
+  scheduleExecuted Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  details    String?
+  ip         String?
+  userAgent  String?
+  status     String   @default("success")
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([resource])
+  @@index([createdAt])
+}
+
+model Permission {
+  id              String           @id
+  name            String           @unique
+  displayName     String
+  description     String?
+  category        String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+
+  @@index([category])
+}
+
+model RolePermission {
+  id           String     @id
+  role         String
+  permissionId String
+  allowed      Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissionId])
+  @@index([role])
+}
+
+model UserPermission {
+  id           String     @id
+  userId       String
+  permissionId String
+  allowed      Boolean
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+  @@index([userId])
+}
+
+model DeviceShare {
+  id           String   @id
+  deviceId     String
+  ownerId      String
+  sharedWithId String
+  permission   String   @default("read")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  sharedWith   User     @relation("DeviceShareRecipient", fields: [sharedWithId], references: [id], onDelete: Cascade)
+  owner        User     @relation("DeviceShareOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([sharedWithId])
+  @@index([deviceId])
+}
+
+model PlcRegisterHistory {
+  id        String   @id
+  deviceId  String
+  property  String
+  address   Int
+  value     Float
+  rawValue  Float
+  unit      String?
+  timestamp DateTime @default(now())
+
+  @@index([deviceId])
+  @@index([timestamp])
+}
+
+// ===================== 新功能模型 =====================
+
+model DeviceTag {
+  id        String             @id @default(cuid())
+  name      String
+  color     String             @default("#005FB8")
+  createdAt DateTime           @default(now())
+  devices   DeviceTagRelation[]
+
+  @@unique([name])
+}
+
+model DeviceTagRelation {
+  deviceId String
+  tagId    String
+  device   Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  tag      DeviceTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([deviceId, tagId])
+  @@index([tagId])
+}
+
+model WebhookConfig {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  method    String   @default("POST")
+  headers   String?
+  events    String   // JSON array of event types
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model WebhookDelivery {
+  id         String   @id @default(cuid())
+  webhookId  String
+  event      String
+  payload    String
+  statusCode Int?
+  response   String?
+  success    Boolean  @default(false)
+  deliveredAt DateTime @default(now())
+
+  @@index([webhookId])
+  @@index([deliveredAt])
+}
+
+model AlertThreshold {
+  id        String   @id @default(cuid())
+  deviceId  String
+  property  String
+  minValue  Float?
+  maxValue  Float?
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, property])
+  @@index([deviceId])
+}
+
+model FirmwareVersion {
+  id          String   @id @default(cuid())
+  deviceId    String
+  version     String
+  filePath    String?
+  changelog   String?
+  status      String   @default("available")
+  fileSize    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+}
+
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  resource  String?
+  details   String?
+  ip        String?
+  duration  Int?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}

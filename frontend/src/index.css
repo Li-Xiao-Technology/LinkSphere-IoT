@@ -1,0 +1,859 @@
+/* ============================================================
+ * Windows 11 Design System for IoT Platform
+ * 基于 Fluent Design Language 设计规范
+ * ============================================================ */
+
+:root {
+  /* === Windows 11 色彩系统 === */
+  /* 主题强调色 - Windows 11 Default Blue */
+  --w11-accent: #005FB8;
+  --w11-accent-hover: #0067C0;
+  --w11-accent-active: #1975C5;
+  --w11-accent-light: rgba(0, 95, 184, 0.08);
+  --w11-accent-lighter: rgba(0, 95, 184, 0.04);
+
+  /* 背景色 - Mica 材质层次 */
+  --w11-bg-app: #F3F3F3;
+  --w11-bg-layer: #FFFFFF;
+  --w11-bg-layer-alt: #FAFAFA;
+  --w11-bg-card: rgba(255, 255, 255, 0.72);
+  --w11-bg-card-hover: rgba(255, 255, 255, 0.88);
+  --w11-bg-acrylic: rgba(255, 255, 255, 0.65);
+  --w11-bg-smoke: rgba(0, 0, 0, 0.4);
+
+  /* 文字色 - 清晰的层级 */
+  --w11-text-primary: #1A1A1A;
+  --w11-text-secondary: #5B5B5B;
+  --w11-text-tertiary: #8A8A8A;
+  --w11-text-disabled: #B0B0B0;
+  --w11-text-on-accent: #FFFFFF;
+
+  /* 描边色 - 微妙的边界 */
+  --w11-stroke: #E5E5E5;
+  --w11-stroke-strong: #D1D1D1;
+  --w11-stroke-focus: #005FB8;
+  --w11-stroke-divider: #EFEFEF;
+
+  /* 状态色 - 语义化反馈 */
+  --w11-success: #107C10;
+  --w11-success-bg: rgba(16, 124, 16, 0.08);
+  --w11-warning: #CA5010;
+  --w11-warning-bg: rgba(202, 80, 16, 0.08);
+  --w11-error: #C42B1C;
+  --w11-error-bg: rgba(196, 43, 28, 0.08);
+  --w11-info: #005FB8;
+  --w11-info-bg: rgba(0, 95, 184, 0.08);
+
+  /* 品牌色 - 设备厂商 */
+  --brand-mijia: #FF6900;
+  --brand-mijia-bg: rgba(255, 105, 0, 0.1);
+  --brand-haier: #0090E8;
+  --brand-haier-bg: rgba(0, 144, 232, 0.1);
+  --brand-midea: #EB0A2B;
+  --brand-midea-bg: rgba(235, 10, 43, 0.1);
+
+  /* === 圆角系统 (Windows 11 Radius) === */
+  --w11-radius-sm: 4px;
+  --w11-radius-md: 6px;
+  --w11-radius-lg: 8px;
+  --w11-radius-xl: 12px;
+  --w11-radius-2xl: 16px;
+  --w11-radius-pill: 999px;
+
+  /* === 阴影系统 (Win11 Elevation) === */
+  --w11-shadow-2: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --w11-shadow-4: 0 2px 4px rgba(0, 0, 0, 0.06), 0 0 2px rgba(0, 0, 0, 0.04);
+  --w11-shadow-8: 0 4px 8px rgba(0, 0, 0, 0.08), 0 0 2px rgba(0, 0, 0, 0.04);
+  --w11-shadow-16: 0 8px 16px rgba(0, 0, 0, 0.1), 0 0 2px rgba(0, 0, 0, 0.04);
+  --w11-shadow-28: 0 14px 28px rgba(0, 0, 0, 0.12), 0 0 8px rgba(0, 0, 0, 0.06);
+  --w11-shadow-accent: 0 4px 12px rgba(0, 95, 184, 0.25);
+
+  /* === 动效系统 (Win11 Motion) === */
+  --w11-ease-standard: cubic-bezier(0.33, 0, 0.1, 1);
+  --w11-ease-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --w11-ease-accelerate: cubic-bezier(0.7, 0, 1, 0.5);
+  --w11-duration-fast: 150ms;
+  --w11-duration-normal: 250ms;
+  --w11-duration-slow: 400ms;
+
+  /* === 间距系统 === */
+  --w11-space-xs: 4px;
+  --w11-space-sm: 8px;
+  --w11-space-md: 12px;
+  --w11-space-lg: 16px;
+  --w11-space-xl: 24px;
+  --w11-space-2xl: 32px;
+  --w11-space-3xl: 48px;
+
+  /* === 字体系统 === */
+  --w11-font-family: "Segoe UI Variable", "Segoe UI", -apple-system,
+    BlinkMacSystemFont, system-ui, "PingFang SC", "Microsoft YaHei UI",
+    "Microsoft YaHei", sans-serif;
+  --w11-font-size-xs: 11px;
+  --w11-font-size-sm: 12px;
+  --w11-font-size-base: 14px;
+  --w11-font-size-md: 15px;
+  --w11-font-size-lg: 17px;
+  --w11-font-size-xl: 20px;
+  --w11-font-size-2xl: 24px;
+  --w11-font-size-3xl: 32px;
+  --w11-font-weight-regular: 400;
+  --w11-font-weight-medium: 500;
+  --w11-font-weight-semibold: 600;
+  --w11-font-weight-bold: 700;
+}
+
+/* === 全局重置 === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--w11-font-family);
+  font-size: var(--w11-font-size-base);
+  color: var(--w11-text-primary);
+  background: var(--w11-bg-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+}
+
+/* === 自定义滚动条 (Win11 风格) === */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--w11-radius-pill);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: background var(--w11-duration-fast) var(--w11-ease-standard);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.45);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+/* === 选中文本样式 === */
+::selection {
+  background: rgba(0, 95, 184, 0.25);
+  color: var(--w11-text-primary);
+}
+
+/* === 动画关键帧 === */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes iconPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 15px currentColor;
+  }
+}
+
+/* === 通用动画类 === */
+.anim-fade-in {
+  animation: fadeIn var(--w11-duration-normal) var(--w11-ease-decelerate);
+}
+
+.anim-slide-up {
+  animation: slideUp var(--w11-duration-normal) var(--w11-ease-decelerate);
+}
+
+.anim-scale-in {
+  animation: scaleIn var(--w11-duration-normal) var(--w11-ease-decelerate);
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* === 通用交互类 === */
+.clickable {
+  cursor: pointer;
+  transition: background var(--w11-duration-fast) var(--w11-ease-standard),
+    transform var(--w11-duration-fast) var(--w11-ease-standard);
+}
+
+.clickable:active {
+  transform: scale(0.98);
+}
+
+/* === Windows 11 风格滑块 === */
+.w11-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--w11-radius-pill);
+  outline: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.w11-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #005FB8;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform var(--w11-duration-fast) var(--w11-ease-standard),
+    box-shadow var(--w11-duration-fast) var(--w11-ease-standard);
+}
+
+.w11-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 6px rgba(0, 95, 184, 0.4);
+}
+
+.w11-slider::-webkit-slider-thumb:active {
+  transform: scale(1.05);
+}
+
+.w11-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #005FB8;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform var(--w11-duration-fast) var(--w11-ease-standard);
+}
+
+.w11-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* --- 移动端滑块优化 --- */
+@media (hover: none) and (pointer: coarse) {
+  .w11-slider {
+    height: 8px;
+  }
+
+  .w11-slider::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+  }
+
+  .w11-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* --- 移动端滑块轨迹 --- */
+.w11-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--w11-radius-pill);
+}
+
+.w11-slider::-moz-range-track {
+  height: 6px;
+  border-radius: var(--w11-radius-pill);
+}
+
+/* === Windows 11 表单元素聚焦态 === */
+input:focus:not(.login-input-box input):not(.register-input-box input),
+textarea:focus,
+select:focus {
+  border-color: #005FB8 !important;
+  box-shadow: 0 0 0 1px #005FB8;
+}
+
+/* === 按钮 hover 反馈 === */
+button:not(:disabled) {
+  transition: transform 0.1s ease, filter 0.15s ease;
+}
+
+button:not(:disabled):hover {
+  filter: brightness(1.05);
+}
+
+button:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+/* === 设备卡片更多菜单 === */
+.device-more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #1A1A1A;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.12s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.device-more-menu-item:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.device-more-menu-item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: #8A8A8A;
+}
+
+.device-more-menu-item.danger {
+  color: #C42B1C;
+}
+
+.device-more-menu-item.danger:hover {
+  background: rgba(196, 43, 28, 0.06);
+}
+
+/* === 设备信息面板行 hover === */
+.device-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+
+.device-info-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* === Error Boundary 样式 === */
+.error-boundary {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--w11-bg-app);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.error-content {
+  background: var(--w11-bg-layer);
+  border-radius: var(--w11-radius-xl);
+  padding: var(--w11-space-3xl);
+  box-shadow: var(--w11-shadow-28);
+  text-align: center;
+  max-width: 400px;
+  animation: scaleIn var(--w11-duration-normal) var(--w11-ease-decelerate);
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: var(--w11-space-lg);
+}
+
+.error-content h2 {
+  font-size: var(--w11-font-size-xl);
+  font-weight: var(--w11-font-weight-semibold);
+  color: var(--w11-text-primary);
+  margin-bottom: var(--w11-space-sm);
+}
+
+.error-content p {
+  font-size: var(--w11-font-size-base);
+  color: var(--w11-text-secondary);
+  margin-bottom: var(--w11-space-xl);
+}
+
+.error-retry-btn {
+  background: var(--w11-accent);
+  color: var(--w11-text-on-accent);
+  border: none;
+  border-radius: var(--w11-radius-md);
+  padding: var(--w11-space-sm) var(--w11-space-xl);
+  font-size: var(--w11-font-size-base);
+  font-weight: var(--w11-font-weight-medium);
+  cursor: pointer;
+  transition: background var(--w11-duration-fast) var(--w11-ease-standard),
+    box-shadow var(--w11-duration-fast) var(--w11-ease-standard);
+}
+
+.error-retry-btn:hover {
+  background: var(--w11-accent-hover);
+  box-shadow: var(--w11-shadow-accent);
+}
+
+/* ============================================================
+ * Mobile Responsive Design
+ * 移动端响应式适配
+ * ============================================================ */
+
+/* --- 平板设备 (≤ 1024px) --- */
+@media (max-width: 1024px) {
+  :root {
+    --w11-space-3xl: 32px;
+  }
+}
+
+/* --- 移动端设备 (≤ 768px) --- */
+@media (max-width: 768px) {
+  :root {
+    --w11-font-size-base: 14px;
+    --w11-space-xs: 4px;
+    --w11-space-sm: 8px;
+    --w11-space-md: 12px;
+    --w11-space-lg: 16px;
+    --w11-space-xl: 20px;
+    --w11-space-2xl: 24px;
+    --w11-space-3xl: 32px;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  body {
+    font-size: 14px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  input,
+  textarea,
+  select {
+    -webkit-user-select: text;
+    user-select: text;
+    font-size: 16px !important;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+/* --- 小屏手机 (≤ 480px) --- */
+@media (max-width: 480px) {
+  :root {
+    --w11-font-size-base: 13px;
+  }
+}
+
+/* --- 触摸设备优化 --- */
+@media (hover: none) and (pointer: coarse) {
+  .clickable:active {
+    transform: scale(0.97);
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+    filter: brightness(0.95);
+  }
+
+  button:not(:disabled):hover {
+    filter: none;
+  }
+
+  /* --- 触摸反馈优化 --- */
+  .touch-feedback {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .touch-feedback::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .touch-feedback:active::after {
+    animation: ripple 0.4s ease-out;
+  }
+
+  /* --- 滑块触控区域增大 --- */
+  input[type="range"] {
+    padding: 8px 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  /* --- 卡片触控优化 --- */
+  .device-card-touch {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+  }
+
+  .device-card-touch:active {
+    transform: scale(0.98) translateY(1px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  }
+
+  /* --- 快捷按钮触控优化 --- */
+  .quick-action-button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .quick-action-button:active {
+    background: rgba(0, 95, 184, 0.15);
+    transform: scale(0.95);
+  }
+}
+
+/* --- 移动端通用工具类 --- */
+@media (max-width: 768px) {
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+
+  .mobile-padding {
+    padding: 16px !important;
+  }
+
+  .mobile-padding-sm {
+    padding: 12px !important;
+  }
+
+  .mobile-gap-sm {
+    gap: 8px !important;
+  }
+
+  .mobile-text-center {
+    text-align: center !important;
+  }
+}
+
+/* --- 横屏模式优化 --- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-landscape-compact {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+}
+
+/* --- 安全区域适配 (iPhone X 及以上) --- */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* --- 减少动画 (用户偏好) --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- 深色模式支持 (基础) --- */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --w11-bg-app: #202020;
+    --w11-bg-layer: #2D2D2D;
+    --w11-bg-layer-alt: #252525;
+    --w11-bg-card: rgba(45, 45, 45, 0.72);
+    --w11-bg-card-hover: rgba(55, 55, 55, 0.88);
+    --w11-bg-acrylic: rgba(45, 45, 45, 0.65);
+    --w11-text-primary: #FFFFFF;
+    --w11-text-secondary: #B0B0B0;
+    --w11-text-tertiary: #8A8A8A;
+    --w11-stroke: #404040;
+    --w11-stroke-strong: #505050;
+    --w11-stroke-divider: #383838;
+    --w11-success-bg: rgba(16, 124, 16, 0.15);
+    --w11-warning-bg: rgba(202, 80, 16, 0.15);
+    --w11-error-bg: rgba(196, 43, 28, 0.15);
+    --w11-info-bg: rgba(0, 95, 184, 0.15);
+  }
+}
+
+/* --- 手动深色模式 --- */
+:root.dark {
+  --w11-bg-app: #202020;
+  --w11-bg-layer: #2D2D2D;
+  --w11-bg-layer-alt: #252525;
+  --w11-bg-card: rgba(45, 45, 45, 0.72);
+  --w11-bg-card-hover: rgba(55, 55, 55, 0.88);
+  --w11-bg-acrylic: rgba(45, 45, 45, 0.65);
+  --w11-bg-smoke: rgba(0, 0, 0, 0.6);
+  --w11-text-primary: #FFFFFF;
+  --w11-text-secondary: #B0B0B0;
+  --w11-text-tertiary: #8A8A8A;
+  --w11-text-disabled: #606060;
+  --w11-stroke: #404040;
+  --w11-stroke-strong: #505050;
+  --w11-stroke-divider: #383838;
+  --w11-success-bg: rgba(16, 124, 16, 0.15);
+  --w11-warning-bg: rgba(202, 80, 16, 0.15);
+  --w11-error-bg: rgba(196, 43, 28, 0.15);
+  --w11-info-bg: rgba(0, 95, 184, 0.15);
+  --w11-shadow-2: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --w11-shadow-4: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.2);
+  --w11-shadow-8: 0 4px 8px rgba(0, 0, 0, 0.35), 0 0 2px rgba(0, 0, 0, 0.2);
+  --w11-shadow-16: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 2px rgba(0, 0, 0, 0.2);
+  --w11-shadow-28: 0 14px 28px rgba(0, 0, 0, 0.45), 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .device-more-menu {
+  background: rgba(32, 32, 32, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .device-more-menu-item {
+  color: #FFFFFF;
+}
+
+.dark .device-more-menu-item:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .desktop-more-menu {
+  background: rgba(32, 32, 32, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .desktop-more-item {
+  color: #D1D1D1;
+}
+
+.dark .desktop-more-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .desktop-more-item.active {
+  color: #4CC2FF;
+  background: rgba(0, 120, 212, 0.15);
+}
+
+.dark .user-menu {
+  background: rgba(32, 32, 32, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .user-menu-item {
+  color: #D1D1D1;
+}
+
+.dark .user-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .user-menu-divider {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark .user-name {
+  color: #FFFFFF;
+}
+
+.dark .user-role {
+  color: #8A8A8A;
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-action-button:hover {
+  background: #FFFFFF;
+  transform: scale(1.1);
+}
+
+.avatar-action-button.delete:hover {
+  background: #C42B1C;
+}
+
+.dark .device-info-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* --- PWA 全屏模式优化 --- */
+@media all and (display-mode: standalone) {
+  body {
+    overscroll-behavior: none;
+  }
+}

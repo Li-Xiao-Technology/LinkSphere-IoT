@@ -1,0 +1,14 @@
+{
+  "name": "linksphere",
+  "version": "1.0.0",
+  "description": "LinkSphere - Smart Device Interconnection Management Platform",
+  "scripts": {
+    "start:backend": "cd backend && npm run dev",
+    "start:frontend": "cd frontend && npm start",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE"
+}

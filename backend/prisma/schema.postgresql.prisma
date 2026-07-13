@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma-pg"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_PG")
+}
+
+model Device {
+  id               String      @id
+  name             String
+  brand            String
+  type             String
+  model            String?
+  status           String      @default("offline")
+  connectionType   String
+  ipAddress        String?
+  macAddress       String?
+  lastSyncTime     DateTime?
+  firmwareVersion  String?
+  config           String?
+  roomId           String?
+  powerConsumption Float       @default(0)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @default(now())
+
+  room             Room?       @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  energyLogs       EnergyLog[]
+  notifications    Notification[]
+}
+
+model Scene {
+  id          String   @id
+  name        String
+  description String?
+  icon        String?
+  actions     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}
+
+model Schedule {
+  id             String   @id
+  name           String
+  cronExpression String
+  action         String
+  enabled        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+}
+
+model User {
+  id                  String               @id
+  username            String               @unique
+  password            String
+  email               String?              @unique
+  role                String               @default("member")
+  householdId         String?
+  createdAt           DateTime             @default(now())
+
+  household           Household?
+  userHouseholds      UserHousehold[]
+  notificationPref    NotificationPreference?
+}
+
+model Room {
+  id        String   @id
+  name      String
+  icon      String   @default("home")
+  sortIndex Int      @default(0)
+  createdAt DateTime @default(now())
+
+  devices   Device[]
+}
+
+model Notification {
+  id        String   @id
+  type      String
+  title     String
+  body      String?
+  deviceId  String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  device    Device?  @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+}
+
+model EnergyLog {
+  id         String   @id
+  deviceId   String
+  power      Float
+  recordedAt DateTime @default(now())
+
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@index([recordedAt])
+}
+
+model Rule {
+  id               String   @id
+  name             String
+  enabled          Boolean  @default(true)
+  triggerType      String
+  triggerCondition String
+  actions          String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+}
+
+model Household {
+  id        String           @id
+  name      String
+  ownerId   String
+  createdAt DateTime        @default(now())
+
+  owner     User             @relation("OwnedHouseholds", fields: [ownerId], references: [id], onDelete: Cascade)
+  members   UserHousehold[]
+  residents User[]           @relation("UserHouseholdRef")
+
+  @@index([ownerId])
+}
+
+model UserHousehold {
+  userId      String
+  householdId String
+  role        String   @default("member")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@id([userId, householdId])
+}
+
+model NotificationPreference {
+  userId           String   @id
+  deviceOffline    Boolean  @default(true)
+  deviceOnline     Boolean  @default(false)
+  warning          Boolean  @default(true)
+  info             Boolean  @default(false)
+  ruleTriggered    Boolean  @default(true)
+  firmwareUpdate   Boolean  @default(true)
+  scheduleExecuted Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: iot-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET environment variable is required. Please set a secure secret key (32+ characters).}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-iot-encryption-key-32-bytes}
+      - DATABASE_URL=file:/app/data/iot_platform.db
+      - FRONTEND_URL=http://localhost:80
+    volumes:
+      - backend-data:/app/data
+    networks:
+      - iot-network
+
+  frontend:
+    build: ./frontend
+    container_name: iot-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - iot-network
+
+networks:
+  iot-network:
+    driver: bridge
+
+volumes:
+  backend-data:
+    driver: local
