@@ -565,6 +565,74 @@ npm run build
 
 ---
 
+## 部署方式
+
+### 1. GitHub Actions 自动部署
+
+项目已配置 GitHub Actions 工作流 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)。
+
+**触发条件**：
+- `push` 到 `main` 分支时自动执行
+- `pull_request` 到 `main` 分支时仅执行构建检查
+
+**工作流包含**：
+- **Build & Test**：构建前后端代码，验证无编译错误
+- **Deploy Frontend**：将前端部署到 GitHub Pages
+- **Build Backend Artifact**：生成后端部署包（可下载用于手动部署）
+
+**GitHub Pages 设置**：
+1. 进入 GitHub 仓库 → Settings → Pages
+2. 选择 **Source** 为 GitHub Actions
+
+**环境变量配置**（在仓库 Settings → Secrets and variables → Actions 中添加）：
+
+| 变量 | 说明 |
+| --- | --- |
+| `REACT_APP_SOCKET_URL` | WebSocket 后端地址（如 `http://your-server:3001`） |
+
+### 2. Docker Compose 部署
+
+```bash
+# 1. 创建 .env 文件
+cp backend/.env.example backend/.env
+# 编辑 backend/.env 设置 JWT_SECRET 和 ENCRYPTION_KEY
+
+# 2. 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+**访问地址**：
+- 前端：`http://localhost`
+- 后端 API：`http://localhost:3001/api`
+- API 文档：`http://localhost:3001/api-docs`
+
+### 3. 手动部署
+
+**后端部署**：
+```bash
+cd backend
+npm ci
+npm run build
+npm run db:generate
+npm start
+```
+
+**前端部署**（需配合 nginx 或其他 Web 服务器）：
+```bash
+cd frontend
+npm ci
+npm run build
+# 将 build 目录部署到 Web 服务器
+```
+
+---
+
 ## License / 授权
 
 Copyright © 2026 Lixiao
